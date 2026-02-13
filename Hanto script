@@ -1,4 +1,4 @@
---== COMBO HUB CLEAN VERSION - HANTO SCRIPT ==--
+--== COMBO HUB CLEAN VERSION - HANTO SCRIPT (BRING VERSION) ==--
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -7,67 +7,32 @@ local LocalPlayer = Players.LocalPlayer
 local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local root = character:WaitForChild("HumanoidRootPart")
 
---================ AUTO COLLECT =================--
+--================ AUTO COLLECT BRING =================--
 
 local HeartsFolder = workspace:WaitForChild("HeartsFolder")
 local CoinsFolder = workspace:WaitForChild("CoinsFolder")
 local SoulFolder = workspace:WaitForChild("SoulCoinsFolder")
 
 local Collecting = false
-local oldPos
 
 local function collectItem(item)
-    if not item:IsA("BasePart") or not item.Parent then return end
-    oldPos = root.CFrame
-    root.CFrame = item.CFrame
-    task.wait(0.05)
-    if item and item.Parent then item:Destroy() end
-    root.CFrame = oldPos
+if not item:IsA("BasePart") or not item.Parent then return end
+
+item.CFrame = root.CFrame  
+item.Velocity = Vector3.zero  
+item.AssemblyLinearVelocity = Vector3.zero
+
 end
 
 RunService.Heartbeat:Connect(function()
-    if Collecting and root then
-        for _,folder in pairs({HeartsFolder, CoinsFolder, SoulFolder}) do
-            for _,item in pairs(folder:GetChildren()) do
-                collectItem(item)
-            end
-        end
-    end
+if Collecting and root then
+for _,folder in pairs({HeartsFolder, CoinsFolder, SoulFolder}) do
+for _,item in pairs(folder:GetChildren()) do
+collectItem(item)
+end
+end
+end
 end)
-
---================ AIR WALK =================--
-
-local FloatOn = false
-local BodyPos, BodyGyro, HeartbeatConn
-local TargetY
-
-local function ClearForces()
-    if HeartbeatConn then HeartbeatConn:Disconnect() HeartbeatConn=nil end
-    if BodyPos then BodyPos:Destroy() BodyPos=nil end
-    if BodyGyro then BodyGyro:Destroy() BodyGyro=nil end
-end
-
-local function SetupAirWalk(char)
-    ClearForces()
-    local root = char:WaitForChild("HumanoidRootPart")
-    TargetY = root.Position.Y
-
-    BodyPos = Instance.new("BodyPosition", root)
-    BodyPos.MaxForce = Vector3.new(1e5,1e6,1e5)
-    BodyPos.P = 20000
-    BodyPos.D = 1500
-
-    BodyGyro = Instance.new("BodyGyro", root)
-    BodyGyro.MaxTorque = Vector3.new(1e6,1e6,1e6)
-    BodyGyro.P = 15000
-
-    HeartbeatConn = RunService.Heartbeat:Connect(function()
-        if FloatOn and root.Parent then
-            BodyPos.Position = Vector3.new(root.Position.X, TargetY, root.Position.Z)
-            BodyGyro.CFrame = CFrame.new(root.Position, root.Position + workspace.CurrentCamera.CFrame.LookVector)
-        end
-    end)
-end
 
 --================ GUI =================--
 
@@ -75,7 +40,7 @@ local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "ComboHubClean"
 
 local frame = Instance.new("Frame", gui)
-frame.Size = UDim2.new(0,190,0,220)
+frame.Size = UDim2.new(0,190,0,190)
 frame.Position = UDim2.new(0,100,0,180)
 frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 frame.Active = true
@@ -114,67 +79,47 @@ minimize.TextColor3 = Color3.new(1,1,1)
 local minimized = false
 
 local function makeBtn(text,y)
-    local b = Instance.new("TextButton", frame)
-    b.Size = UDim2.new(1,-10,0,40)
-    b.Position = UDim2.new(0,5,0,y)
-    b.Text = text
-    b.BackgroundColor3 = Color3.fromRGB(35,35,35)
-    b.TextColor3 = Color3.new(1,1,1)
-    return b
+local b = Instance.new("TextButton", frame)
+b.Size = UDim2.new(1,-10,0,40)
+b.Position = UDim2.new(0,5,0,y)
+b.Text = text
+b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+b.TextColor3 = Color3.new(1,1,1)
+return b
 end
 
-local collectBtn = makeBtn("Auto Collect: OFF",50)
-local airBtn = makeBtn("Air Walk: OFF",95)
-local up = makeBtn("⬆ Lên",140)
-local down = makeBtn("⬇ Xuống",180)
+local collectBtn = makeBtn("Auto Collect Bring: OFF",55)
+local lobbyBtn = makeBtn("Teleport: Lobby",100)
 
 -- Thu gọn
 minimize.MouseButton1Click:Connect(function()
-    minimized = not minimized
-    for _,v in pairs(frame:GetChildren()) do
-        if v:IsA("TextButton") and v ~= minimize then
-            v.Visible = not minimized
-        end
-    end
-    credit.Visible = not minimized
-    frame.Size = minimized and UDim2.new(0,190,0,40) or UDim2.new(0,190,0,220)
+minimized = not minimized
+for _,v in pairs(frame:GetChildren()) do
+if v:IsA("TextButton") and v ~= minimize then
+v.Visible = not minimized
+end
+end
+credit.Visible = not minimized
+frame.Size = minimized and UDim2.new(0,190,0,40) or UDim2.new(0,190,0,190)
 end)
 
--- Auto Collect
+-- Toggle Auto Collect
 collectBtn.MouseButton1Click:Connect(function()
-    Collecting = not Collecting
-    collectBtn.Text = Collecting and "Auto Collect: ON" or "Auto Collect: OFF"
-    collectBtn.BackgroundColor3 = Collecting and Color3.fromRGB(0,170,0) or Color3.fromRGB(35,35,35)
+Collecting = not Collecting
+collectBtn.Text = Collecting and "Auto Collect Bring: ON" or "Auto Collect Bring: OFF"
+collectBtn.BackgroundColor3 = Collecting and Color3.fromRGB(0,170,0) or Color3.fromRGB(35,35,35)
 end)
 
--- Air Walk
-airBtn.MouseButton1Click:Connect(function()
-    FloatOn = not FloatOn
-    if FloatOn then
-        airBtn.Text = "Air Walk: ON"
-        airBtn.BackgroundColor3 = Color3.fromRGB(0,170,0)
-        SetupAirWalk(LocalPlayer.Character)
-    else
-        airBtn.Text = "Air Walk: OFF"
-        airBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-        ClearForces()
-    end
-end)
-
-up.MouseButton1Click:Connect(function()
-    if FloatOn then TargetY += 20 end
-end)
-
-down.MouseButton1Click:Connect(function()
-    if FloatOn then TargetY -= 20 end
+-- Teleport Lobby
+lobbyBtn.MouseButton1Click:Connect(function()
+local lobby = workspace:FindFirstChild("lobbySpawn")
+if lobby and lobby:IsA("BasePart") then
+root.CFrame = lobby.CFrame + Vector3.new(0,3,0)
+end
 end)
 
 -- Respawn Fix
 LocalPlayer.CharacterAdded:Connect(function(char)
-    character = char
-    root = char:WaitForChild("HumanoidRootPart")
-    if FloatOn then
-        task.wait(0.3)
-        SetupAirWalk(char)
-    end
+character = char
+root = char:WaitForChild("HumanoidRootPart")
 end)
