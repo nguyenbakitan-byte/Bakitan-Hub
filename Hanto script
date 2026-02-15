@@ -1,13 +1,9 @@
---== COMBO HUB CLEAN VERSION - HANTO SCRIPT (VOID WALK) ==--
-
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
 local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local root = character:WaitForChild("HumanoidRootPart")
-
---================ AUTO COLLECT BRING =================--
 
 local HeartsFolder = workspace:WaitForChild("HeartsFolder")
 local CoinsFolder = workspace:WaitForChild("CoinsFolder")
@@ -33,8 +29,6 @@ RunService.Heartbeat:Connect(function()
     end
 end)
 
---================ VOID WALK SYSTEM =================--
-
 local VoidPlatform
 local VoidY = -300
 local WalkingVoid = false
@@ -54,10 +48,8 @@ end
 RunService.Heartbeat:Connect(function()
     if WalkingVoid and root and VoidPlatform then
         
-        -- giữ sàn dưới chân
         VoidPlatform.Position = Vector3.new(root.Position.X, VoidY - 3, root.Position.Z)
         
-        -- Anti Void
         if root.Position.Y < VoidY - 25 then
             root.CFrame = CFrame.new(root.Position.X, VoidY, root.Position.Z)
             root.Velocity = Vector3.zero
@@ -66,8 +58,6 @@ RunService.Heartbeat:Connect(function()
         
     end
 end)
-
---================ GUI =================--
 
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "ComboHubClean"
@@ -79,7 +69,6 @@ frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 frame.Active = true
 frame.Draggable = true
 
--- Title
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1,-40,0,25)
 title.Position = UDim2.new(0,5,0,5)
@@ -90,7 +79,6 @@ title.TextScaled = true
 title.Font = Enum.Font.SourceSansBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Credit
 local credit = Instance.new("TextLabel", frame)
 credit.Size = UDim2.new(1,-10,0,18)
 credit.Position = UDim2.new(0,5,0,28)
@@ -101,7 +89,6 @@ credit.TextScaled = true
 credit.Font = Enum.Font.SourceSans
 credit.TextXAlignment = Enum.TextXAlignment.Left
 
--- Minimize
 local minimize = Instance.new("TextButton", frame)
 minimize.Size = UDim2.new(0,30,0,30)
 minimize.Position = UDim2.new(1,-35,0,5)
@@ -124,7 +111,6 @@ end
 local collectBtn = makeBtn("Auto Collect Bring: OFF",55)
 local voidBtn = makeBtn("Walk On Void",100)
 
--- Minimize toggle
 minimize.MouseButton1Click:Connect(function()
     minimized = not minimized
     for _,v in pairs(frame:GetChildren()) do
@@ -136,14 +122,12 @@ minimize.MouseButton1Click:Connect(function()
     frame.Size = minimized and UDim2.new(0,190,0,40) or UDim2.new(0,190,0,190)
 end)
 
--- Toggle Collect
 collectBtn.MouseButton1Click:Connect(function()
     Collecting = not Collecting
     collectBtn.Text = Collecting and "Auto Collect Bring: ON" or "Auto Collect Bring: OFF"
     collectBtn.BackgroundColor3 = Collecting and Color3.fromRGB(0,170,0) or Color3.fromRGB(35,35,35)
 end)
 
--- Walk Void Button
 voidBtn.MouseButton1Click:Connect(function()
     if not root then return end
     
@@ -153,7 +137,6 @@ voidBtn.MouseButton1Click:Connect(function()
     root.CFrame = CFrame.new(root.Position.X, VoidY, root.Position.Z)
 end)
 
--- Respawn Fix
 LocalPlayer.CharacterAdded:Connect(function(char)
     character = char
     root = char:WaitForChild("HumanoidRootPart")
