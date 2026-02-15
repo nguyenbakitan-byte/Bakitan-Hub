@@ -1,9 +1,13 @@
+--== COMBO HUB CLEAN VERSION - HANTO SCRIPT (VOID WALK) ==--
+
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
 local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local root = character:WaitForChild("HumanoidRootPart")
+
+--================ AUTO COLLECT BRING =================--
 
 local HeartsFolder = workspace:WaitForChild("HeartsFolder")
 local CoinsFolder = workspace:WaitForChild("CoinsFolder")
@@ -12,23 +16,58 @@ local SoulFolder = workspace:WaitForChild("SoulCoinsFolder")
 local Collecting = false
 
 local function collectItem(item)
-if not item:IsA("BasePart") or not item.Parent then return end
-
-item.CFrame = root.CFrame  
-item.Velocity = Vector3.zero  
-item.AssemblyLinearVelocity = Vector3.zero
-
+    if not item:IsA("BasePart") or not item.Parent then return end
+    
+    item.CFrame = root.CFrame
+    item.Velocity = Vector3.zero
+    item.AssemblyLinearVelocity = Vector3.zero
 end
 
 RunService.Heartbeat:Connect(function()
-if Collecting and root then
-for _,folder in pairs({HeartsFolder, CoinsFolder, SoulFolder}) do
-for _,item in pairs(folder:GetChildren()) do
-collectItem(item)
-end
-end
-end
+    if Collecting and root then
+        for _,folder in pairs({HeartsFolder, CoinsFolder, SoulFolder}) do
+            for _,item in pairs(folder:GetChildren()) do
+                collectItem(item)
+            end
+        end
+    end
 end)
+
+--================ VOID WALK SYSTEM =================--
+
+local VoidPlatform
+local VoidY = -300
+local WalkingVoid = false
+
+local function createVoidPlatform()
+    if VoidPlatform then VoidPlatform:Destroy() end
+    
+    VoidPlatform = Instance.new("Part")
+    VoidPlatform.Size = Vector3.new(60,1,60)
+    VoidPlatform.Anchored = true
+    VoidPlatform.CanCollide = true
+    VoidPlatform.Transparency = 1
+    VoidPlatform.Name = "VoidPlatform"
+    VoidPlatform.Parent = workspace
+end
+
+RunService.Heartbeat:Connect(function()
+    if WalkingVoid and root and VoidPlatform then
+        
+        -- giữ sàn dưới chân
+        VoidPlatform.Position = Vector3.new(root.Position.X, VoidY - 3, root.Position.Z)
+        
+        -- Anti Void
+        if root.Position.Y < VoidY - 25 then
+            root.CFrame = CFrame.new(root.Position.X, VoidY, root.Position.Z)
+            root.Velocity = Vector3.zero
+            root.AssemblyLinearVelocity = Vector3.zero
+        end
+        
+    end
+end)
+
+--================ GUI =================--
 
 local gui = Instance.new("ScreenGui", game.CoreGui)
 gui.Name = "ComboHubClean"
@@ -40,6 +79,7 @@ frame.BackgroundColor3 = Color3.fromRGB(25,25,25)
 frame.Active = true
 frame.Draggable = true
 
+-- Title
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1,-40,0,25)
 title.Position = UDim2.new(0,5,0,5)
@@ -50,6 +90,7 @@ title.TextScaled = true
 title.Font = Enum.Font.SourceSansBold
 title.TextXAlignment = Enum.TextXAlignment.Left
 
+-- Credit
 local credit = Instance.new("TextLabel", frame)
 credit.Size = UDim2.new(1,-10,0,18)
 credit.Position = UDim2.new(0,5,0,28)
@@ -60,6 +101,7 @@ credit.TextScaled = true
 credit.Font = Enum.Font.SourceSans
 credit.TextXAlignment = Enum.TextXAlignment.Left
 
+-- Minimize
 local minimize = Instance.new("TextButton", frame)
 minimize.Size = UDim2.new(0,30,0,30)
 minimize.Position = UDim2.new(1,-35,0,5)
@@ -70,43 +112,49 @@ minimize.TextColor3 = Color3.new(1,1,1)
 local minimized = false
 
 local function makeBtn(text,y)
-local b = Instance.new("TextButton", frame)
-b.Size = UDim2.new(1,-10,0,40)
-b.Position = UDim2.new(0,5,0,y)
-b.Text = text
-b.BackgroundColor3 = Color3.fromRGB(35,35,35)
-b.TextColor3 = Color3.new(1,1,1)
-return b
+    local b = Instance.new("TextButton", frame)
+    b.Size = UDim2.new(1,-10,0,40)
+    b.Position = UDim2.new(0,5,0,y)
+    b.Text = text
+    b.BackgroundColor3 = Color3.fromRGB(35,35,35)
+    b.TextColor3 = Color3.new(1,1,1)
+    return b
 end
 
 local collectBtn = makeBtn("Auto Collect Bring: OFF",55)
-local lobbyBtn = makeBtn("Teleport: Lobby",100)
+local voidBtn = makeBtn("Walk On Void",100)
 
+-- Minimize toggle
 minimize.MouseButton1Click:Connect(function()
-minimized = not minimized
-for _,v in pairs(frame:GetChildren()) do
-if v:IsA("TextButton") and v ~= minimize then
-v.Visible = not minimized
-end
-end
-credit.Visible = not minimized
-frame.Size = minimized and UDim2.new(0,190,0,40) or UDim2.new(0,190,0,190)
+    minimized = not minimized
+    for _,v in pairs(frame:GetChildren()) do
+        if v:IsA("TextButton") and v ~= minimize then
+            v.Visible = not minimized
+        end
+    end
+    credit.Visible = not minimized
+    frame.Size = minimized and UDim2.new(0,190,0,40) or UDim2.new(0,190,0,190)
 end)
 
+-- Toggle Collect
 collectBtn.MouseButton1Click:Connect(function()
-Collecting = not Collecting
-collectBtn.Text = Collecting and "Auto Collect Bring: ON" or "Auto Collect Bring: OFF"
-collectBtn.BackgroundColor3 = Collecting and Color3.fromRGB(0,170,0) or Color3.fromRGB(35,35,35)
+    Collecting = not Collecting
+    collectBtn.Text = Collecting and "Auto Collect Bring: ON" or "Auto Collect Bring: OFF"
+    collectBtn.BackgroundColor3 = Collecting and Color3.fromRGB(0,170,0) or Color3.fromRGB(35,35,35)
 end)
 
-lobbyBtn.MouseButton1Click:Connect(function()
-local lobby = workspace:FindFirstChild("lobbySpawn")
-if lobby and lobby:IsA("BasePart") then
-root.CFrame = lobby.CFrame + Vector3.new(0,3,0)
-end
+-- Walk Void Button
+voidBtn.MouseButton1Click:Connect(function()
+    if not root then return end
+    
+    WalkingVoid = true
+    createVoidPlatform()
+    
+    root.CFrame = CFrame.new(root.Position.X, VoidY, root.Position.Z)
 end)
 
+-- Respawn Fix
 LocalPlayer.CharacterAdded:Connect(function(char)
-character = char
-root = char:WaitForChild("HumanoidRootPart")
+    character = char
+    root = char:WaitForChild("HumanoidRootPart")
 end)
